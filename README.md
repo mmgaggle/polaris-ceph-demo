@@ -2,7 +2,12 @@ Create an account and root user using radosgw-admin
 
 ```
 radosgw-admin account create --account-name=polaris
-radosgw-admin user create --uid=kb --display-name=polaris-root --account-root --gen-secret --gen-access-key --account-id=<ACCOUND ID>
+radosgw-admin user create --uid=polaris \
+                          --display-name=polaris-root \
+                          --account-root \
+                          --gen-secret \
+                          --gen-access-key \
+                          --account-id=<ACCOUNT ID>
 ```
 
 Create IAM/S3 resources using Terraform
