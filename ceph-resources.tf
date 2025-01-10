@@ -49,20 +49,11 @@ resource "aws_s3_bucket" "catalog_bucket" {
     Environment = "Production"
   }
 }
-data "aws_iam_policy" "AmazonS3FullAccess" {
-  arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-}
 
 # Create IAM user catalog_admin
 resource "aws_iam_user" "catalog_admin" {
   name = "catalog_admin"
 }
-
-resource "aws_iam_user_policy_attachment" "catalog_admin_policy_attach" {
-  user = "catalog_admin"
-  policy_arn = "${data.aws_iam_policy.AmazonS3FullAccess.arn}"
-}
-
 
 # Create IAM user catalog.client
 resource "aws_iam_user" "catalog_client_user" {
