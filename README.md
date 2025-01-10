@@ -19,7 +19,9 @@ terraform apply
 Ceph does not support customer managed policies. If we try to attach a managed policy that Ceph does support using Terraform it will fail because Terraform validates that all policies exist by making GetPolicy calls for validation purposes, and GetPolicy is not a IAM action that Ceph supports yet. We can still attach a managed policy using the AWS CLI:
 
 ```
-aws iam --profile polaris-root attach-user-policy --user-name catalog_admin --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+aws iam --profile polaris-root attach-user-policy \
+  --user-name catalog_admin \
+  --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
 ```
 
 Start Polaris container
