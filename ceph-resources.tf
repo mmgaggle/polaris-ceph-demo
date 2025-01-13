@@ -27,6 +27,12 @@ variable "account_arn" {
   default     = "RGW12345678901234567"
 }
 
+# Catalog Location
+variable "location" {
+  description = "Location for catalog, eg. s3://polaris"
+  default     = "s3://polaris"
+}
+
 # Provider configuration
 provider "aws" {
   region = "default"
@@ -62,10 +68,22 @@ resource "aws_iam_user" "catalog_admin" {
   path = "/polaris/catalog/"
 }
 
-# Create catalog admin credentials
-resource "aws_iam_access_key" "test" {
+# Create Access Key for catalog admin
+resource "aws_iam_access_key" "catalog_admin_key" {
   user = aws_iam_user.catalog_admin.name
 }
+
+output "admin_access_key" {
+  value = aws_iam_access_key.catalog_admin_key.id
+  description = "Catalog admin access key"
+}
+
+output "admin_secret_key" {
+  value = aws_iam_access_key.catalog_admin_key.secret
+  description = "Catalog admin secret key"
+  sensitive   = true
+}
+
 
 # Create IAM role catalog_client
 resource "aws_iam_role" "catalog_client_role" {
@@ -102,4 +120,35 @@ resource "aws_iam_role_policy" "catalog_client_policy" {
       }
     ]
   })
+}
+
+terraform {
+  required_providers {
+    docker = {
+      source = "kreuzwerker/docker"
+      version = "~> 3.0.1"
+    }
+  }
+}
+
+provider "docker" {}
+
+resource "docker_image" "polaris" {
+  name         = "icr.io/ceph-polaris/polaris:latest"
+  keep_locally = false
+}
+
+resource "docker_container" "polaris" {
+  image = docker_image.polaris.image_id
+  name  = "polaris"
+  ports {
+    internal = 8181
+    external = 8181
+  }
+  env = [
+    "AWS_ACCESS_KEY_ID=${aws_iam_access_key.catalog_admin_key.id}",
+    "AWS_SECRET_ACCESS_KEY=${aws_iam_access_key.catalog_admin_key.secret}",
+    format("ENDPOINT_URL=%s",var.ceph_endpoint),
+    format("LOCATION=%s",var.location)
+  ]
 }
