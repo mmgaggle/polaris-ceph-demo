@@ -21,6 +21,12 @@ variable "bucket_name" {
   default     = "polaris"
 }
 
+# Account ARN
+variable "account_arn" {
+  description = "Account ARN to use in IAM resources"
+  default     = "RGW12345678901234567"
+}
+
 # Provider configuration
 provider "aws" {
   region = "default"
@@ -50,25 +56,49 @@ resource "aws_s3_bucket" "catalog_bucket" {
   }
 }
 
-# Create IAM user catalog_admin
+# Create IAM user catalog admin
 resource "aws_iam_user" "catalog_admin" {
-  name = "catalog_admin"
+  name = "admin"
+  path = "/polaris/catalog/"
 }
 
-# Create IAM user catalog.client
-resource "aws_iam_user" "catalog_client_user" {
-  name = "catalog_client"
+# Create catalog admin credentials
+resource "aws_iam_access_key" "test" {
+  user = aws_iam_user.catalog_admin.name
 }
 
-# Create IAM role catalog.client
+# Create IAM role catalog_client
 resource "aws_iam_role" "catalog_client_role" {
-  name               = "catalog.client"
+  name               = "client"
+  path               = "/polaris/catalog/"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action    = "sts:AssumeRole"
+        Principal = {
+          AWS: format("arn:aws:iam::%s:user/polaris/catalog/admin",var.account_arn)
+        }
         Effect    = "Allow"
+      }
+    ]
+  })
+}
+
+# IAM Policy for limited S3 bucket access (for client role/user)
+resource "aws_iam_role_policy" "catalog_client_policy" {
+  name        = "catalog_client_policy"
+  role        = "client"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["s3:*"]
+        Effect   = "Allow"
+        Resource = [
+          format("arn:aws:s3:::%s/*",var.bucket_name),
+          format("arn:aws:s3:::%s",var.bucket_name)
+        ]
       }
     ]
   })
