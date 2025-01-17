@@ -20,7 +20,7 @@ curl -s -i -X POST \
                   \"s3.endpoint\": \"https://s3.cephlabs.com\",
                   \"s3.credentials.catalog.accessKeyId\": \"S3_ACCESS_KEY\",
                   \"s3.credentials.catalog.secretAccessKey\": \"S3_SECRET_KEY\",
-                  \"s3.roleArn\": \"arn:aws:iam::RGW42603947660038067:role/catalog_client\"
+                  \"s3.roleArn\": \"arn:aws:iam::RGW25531238860968914:role/polaris/catalog/client\"
                 }
               }"
 

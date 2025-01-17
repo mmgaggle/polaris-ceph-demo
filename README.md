@@ -13,6 +13,7 @@ radosgw-admin user create --uid=polaris \
 Create IAM/S3 resources using Terraform
 
 ```
+terraform init
 terraform plan
 terraform apply
 ```
@@ -22,6 +23,7 @@ Start Polaris container
 export S3_SECRET_KEY=<SECRET KEY>
 export S3_ACCESS_KEY=<ACCESS KEY>
 export S3_ENDPOINT=<https://s3.example.com>
+export S3_LOCATION=s3://polaris
 
 sudo docker run -p 8181:8181 -d \
   --network polaris \
@@ -29,7 +31,7 @@ sudo docker run -p 8181:8181 -d \
   --env S3_ACCESS_KEY=${S3_ACCESS_KEY} \
   --env AWS_REGION=default \
   --env AWS_ENDPOINT_URL_STS=${S3_ENDPOINT} \
-  localhost:5001/polaris:s3compatible
+  icr.io/ceph-polaris/polaris
 ```
 
 Spark
@@ -44,4 +46,12 @@ ${SPARK_HOME}/bin/spark-sql \
   --conf spark.sql.catalog.polaris.token="${REGTEST_ROOT_BEARER_TOKEN:-principal:root;realm:default-realm}" \
   --conf spark.sql.catalog.polaris.warehouse=my-ceph-wh
   --conf spark.sql.defaultCatalog=polaris
+```
+
+Create table query
+```
+CREATE TABLE prod.db.foo (
+    id bigint NOT NULL COMMENT 'unique id',
+    data string)
+USING iceberg;
 ```

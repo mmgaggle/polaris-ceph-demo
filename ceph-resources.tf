@@ -7,7 +7,7 @@ variable "ceph_endpoint" {
 # Define credentials path and profile name
 variable "credentials_path" {
   description = "Credentials path"
-  default     = "/home/kyle/.aws/credentials"
+  default     = "~/.aws/credentials"
 }
 
 variable "credentials_profile" {
@@ -120,6 +120,9 @@ resource "aws_iam_role_policy" "catalog_client_policy" {
       }
     ]
   })
+  depends_on = [
+    aws_iam_role.catalog_client_role
+  ]
 }
 
 terraform {
@@ -130,7 +133,7 @@ terraform {
     }
   }
 }
-
+/*
 provider "docker" {}
 
 resource "docker_image" "polaris" {
@@ -152,3 +155,4 @@ resource "docker_container" "polaris" {
     format("LOCATION=%s",var.location)
   ]
 }
+*/
